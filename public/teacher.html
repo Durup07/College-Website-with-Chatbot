@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Advanced Teacher Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+body{display:flex;background:#f4f6f9;min-height:100vh;}
+.sidebar{width:250px;background:linear-gradient(180deg,#4e54c8,#8f94fb);color:#fff;padding:20px;}
+.sidebar h2{margin-bottom:20px;}
+.sidebar ul{list-style:none;}
+.sidebar ul li{padding:12px;margin:10px 0;border-radius:10px;cursor:pointer;background:rgba(255,255,255,0.1);} 
+.sidebar ul li:hover{background:#fff;color:#4e54c8;}
+.main{flex:1;padding:20px;}
+.header{display:flex;justify-content:space-between;align-items:center;background:#fff;padding:15px;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,0.1);} 
+.section{display:none;margin-top:20px;background:#fff;padding:20px;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,0.08);} 
+.section.active{display:block;}
+table{width:100%;border-collapse:collapse;margin-top:10px;} 
+th,td{padding:10px;border-bottom:1px solid #ddd;text-align:center;}
+input,select{padding:8px;margin:5px;border:1px solid #ddd;border-radius:6px;}
+button{padding:8px 12px;border:none;border-radius:6px;background:#4e54c8;color:#fff;cursor:pointer;}
+button:hover{background:#3b40a4;}
+canvas{margin-top:20px;}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+<h2>👨‍🏫 Teacher</h2>
+<ul>
+<li onclick="show('dashboard')">Dashboard</li>
+<li onclick="show('students')">Students</li>
+<li onclick="show('marks')">Upload Marks</li>
+<li onclick="show('subjects')">Subjects</li>
+<li onclick="show('charts')">Charts</li>
+<li onclick="show('pdf')">Generate PDF</li>
+<li onclick="logout()">Logout</li>
+</ul>
+</div>
+
+<div class="main">
+<div class="header"><h2>Teacher Dashboard</h2></div>
+
+<div id="dashboard" class="section active">
+<h3>📊 Overview</h3>
+<p>Total Students: <span id="totalStudents"></span></p>
+</div>
+
+<div id="students" class="section">
+<h3>👨‍🎓 Student List</h3>
+<table id="studentTable">
+<tr><th>Name</th><th>Email</th><th>Action</th></tr>
+</table>
+</div>
+
+<div id="marks" class="section">
+<h3>📊 Upload Marks</h3>
+<select id="studentList"></select>
+<div id="marksInputs"></div>
+<button onclick="saveMarks()">Save Marks</button>
+</div>
+
+<div id="subjects" class="section">
+<h3>📚 Subjects</h3>
+<input type="text" id="subjectName" placeholder="Subject name">
+<button onclick="addSubject()">Add</button>
+<ul id="subjectList"></ul>
+</div>
+
+<div id="charts" class="section">
+<h3>📈 Marks Visualization</h3>
+<select id="chartStudent" onchange="loadChart()"></select>
+<canvas id="marksChart"></canvas>
+</div>
+
+<div id="pdf" class="section">
+<h3>📄 Generate Student PDF Result</h3>
+<select id="pdfStudent"></select>
+<button onclick="generatePDF()">Download PDF</button>
+</div>
+
+</div>
+
+<script>
+const { jsPDF } = window.jspdf;
+
+function show(id){
+document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+}
+
+function logout(){
+localStorage.removeItem('teacher');
+window.location.href='login.html';
+}
+
+function loadStudents(){
+let students=JSON.parse(localStorage.getItem('students')||'[]');
+document.getElementById('totalStudents').innerText=students.length;
+
+let table=document.getElementById('studentTable');
+table.innerHTML='<tr><th>Name</th><th>Email</th><th>Action</th></tr>';
+
+let select=document.getElementById('studentList');
+let chartSelect=document.getElementById('chartStudent');
+let pdfSelect=document.getElementById('pdfStudent');
+
+select.innerHTML=''; chartSelect.innerHTML=''; pdfSelect.innerHTML='';
+
+students.forEach((s,i)=>{
+let row=document.createElement('tr');
+row.innerHTML=`<td>${s.name}</td><td>${s.email}</td>
+<td><button onclick="deleteStudent(${i})">Delete</button></td>`;
+table.appendChild(row);
+
+[select,chartSelect,pdfSelect].forEach(el=>{
+let opt=document.createElement('option');
+opt.value=s.email;
+opt.text=s.name;
+el.appendChild(opt);
+});
+});
+}
+
+function deleteStudent(i){
+let students=JSON.parse(localStorage.getItem('students')||'[]');
+students.splice(i,1);
+localStorage.setItem('students',JSON.stringify(students));
+loadStudents();
+}
+
+function getSubjects(){return JSON.parse(localStorage.getItem('subjects')||'[]');}
+function saveSubjects(data){localStorage.setItem('subjects',JSON.stringify(data));}
+
+function addSubject(){
+let name=document.getElementById('subjectName').value;
+if(!name)return;
+let subjects=getSubjects();
+subjects.push(name);
+saveSubjects(subjects);
+document.getElementById('subjectName').value='';
+loadSubjects();
+loadMarksInputs();
+}
+
+function loadSubjects(){
+let subjects=getSubjects();
+let list=document.getElementById('subjectList');
+list.innerHTML='';
+subjects.forEach((s,i)=>{
+let li=document.createElement('li');
+li.innerHTML=`${s} <button onclick="deleteSubject(${i})">❌</button>`;
+list.appendChild(li);
+});
+}
+
+function deleteSubject(i){
+let subjects=getSubjects();
+subjects.splice(i,1);
+saveSubjects(subjects);
+loadSubjects();
+loadMarksInputs();
+}
+
+function loadMarksInputs(){
+let subjects=getSubjects();
+let box=document.getElementById('marksInputs');
+box.innerHTML='';
+subjects.forEach(s=>{
+let input=document.createElement('input');
+input.placeholder=s;
+input.id=s;
+box.appendChild(input);
+});
+}
+
+function saveMarks(){
+let email=document.getElementById('studentList').value;
+let subjects=getSubjects();
+let marks={};
+subjects.forEach(s=>{
+marks[s]=document.getElementById(s).value;
+});
+let all=JSON.parse(localStorage.getItem('marks')||'{}');
+all[email]=marks;
+localStorage.setItem('marks',JSON.stringify(all));
+alert('Saved ✅');
+}
+
+// PDF GENERATION
+function generatePDF(){
+let email=document.getElementById('pdfStudent').value;
+let students=JSON.parse(localStorage.getItem('students')||'[]');
+let student=students.find(s=>s.email===email);
+
+let subjects=getSubjects();
+let all=JSON.parse(localStorage.getItem('marks')||'{}');
+let marks=all[email]||{};
+
+let doc=new jsPDF();
+
+// HEADER
+ doc.setFontSize(18);
+ doc.text("ABC College", 80, 15);
+ doc.setFontSize(12);
+ doc.text("Student Marksheet", 85, 22);
+
+ doc.text("Name: "+student.name, 20, 35);
+ doc.text("Email: "+student.email, 20, 42);
+
+ let y=55;
+ let total=0;
+
+ subjects.forEach(sub=>{
+ let m=parseInt(marks[sub]||0);
+ doc.text(sub+": "+m, 20, y);
+ total+=m;
+ y+=8;
+ });
+
+ let percent = subjects.length ? (total/subjects.length).toFixed(2) : 0;
+ let result = percent >= 40 ? "Pass" : "Fail";
+
+ y+=5;
+ doc.text("Total: "+total, 20, y);
+ y+=8;
+ doc.text("Percentage: "+percent+"%", 20, y);
+ y+=8;
+ doc.text("Result: "+result, 20, y);
+
+ doc.save(student.name+"_result.pdf");
+}
+
+window.onload=function(){
+loadStudents();
+loadSubjects();
+loadMarksInputs();
+}
+</script>
+
+</body>
+</html>

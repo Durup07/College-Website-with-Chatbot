@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>College Chatbot</title>
+
+<style>
+
+.chatbot{
+width:300px;
+border:1px solid #ccc;
+padding:10px;
+}
+
+#chatbox{
+height:200px;
+overflow-y:auto;
+border:1px solid #ddd;
+margin-bottom:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="chatbot">
+
+<h3>Admission Chatbot</h3>
+
+<div id="chatbox"></div>
+
+<input type="text" id="userInput" placeholder="Ask something">
+
+<button onclick="sendMessage()">Send</button>
+
+</div>
+
+<script>
+
+function sendMessage(){
+
+let input = document.getElementById("userInput").value.toLowerCase();
+let chatbox = document.getElementById("chatbox");
+
+chatbox.innerHTML += "<p><b>You:</b> "+input+"</p>";
+
+let reply = "I didn't understand.";
+
+if(input.includes("admission")){
+reply="Admission forms are available online.";
+}
+
+if(input.includes("fee")){
+reply="Fee details are available on the admission page.";
+}
+
+chatbox.innerHTML += "<p><b>Bot:</b> "+reply+"</p>";
+
+document.getElementById("userInput").value="";
+
+}
+
+</script>
+
+</body>
+
+</html>

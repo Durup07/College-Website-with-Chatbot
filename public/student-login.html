@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Register & Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+body{
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+background:linear-gradient(135deg,#36d1dc,#5b86e5);
+}
+.container{
+background:#fff;
+padding:25px;
+border-radius:15px;
+width:380px;
+box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+h2{
+text-align:center;
+margin-bottom:15px;
+color:#333;
+}
+input{
+width:100%;
+padding:12px;
+margin:8px 0;
+border:1px solid #ddd;
+border-radius:10px;
+outline:none;
+}
+button{
+width:100%;
+padding:12px;
+margin-top:10px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+color:#fff;
+font-size:15px;
+}
+.register-btn{background:#28a745;}
+.login-btn{background:#4e54c8;}
+button:hover{opacity:0.9;}
+.error{
+color:red;
+text-align:center;
+margin-top:10px;
+}
+.success{
+color:green;
+text-align:center;
+margin-top:10px;
+}
+.switch{
+text-align:center;
+margin-top:10px;
+font-size:14px;
+cursor:pointer;
+color:#4e54c8;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h2 id="title">👨‍🎓 Student Register</h2>
+
+<input type="text" id="name" placeholder="Enter Name">
+<input type="text" id="email" placeholder="Enter Email">
+<input type="password" id="password" placeholder="Enter Password">
+
+<button class="register-btn" onclick="register()" id="registerBtn">Register</button>
+<button class="login-btn" onclick="login()" id="loginBtn" style="display:none;">Login</button>
+
+<div class="switch" onclick="toggle()">
+Already have account? Login here
+</div>
+
+<div class="error" id="error"></div>
+<div class="success" id="success"></div>
+
+</div>
+
+<script>
+function getStudents(){
+return JSON.parse(localStorage.getItem("students") || "[]");
+}
+
+function saveStudents(data){
+localStorage.setItem("students", JSON.stringify(data));
+}
+
+function register(){
+let name = document.getElementById("name").value;
+let email = document.getElementById("email").value;
+let pass = document.getElementById("password").value;
+let error = document.getElementById("error");
+let success = document.getElementById("success");
+
+error.innerText="";
+success.innerText="";
+
+if(!name || !email || !pass){
+error.innerText="All fields are required";
+return;
+}
+
+let students = getStudents();
+
+let exists = students.find(s => s.email === email);
+if(exists){
+error.innerText="Email already registered";
+return;
+}
+
+students.push({name,email,password:pass});
+saveStudents(students);
+
+success.innerText="Registration successful! Now login";
+}
+
+function login(){
+let email = document.getElementById("email").value;
+let pass = document.getElementById("password").value;
+let error = document.getElementById("error");
+let success = document.getElementById("success");
+
+error.innerText="";
+success.innerText="";
+
+let students = getStudents();
+
+let user = students.find(s => s.email === email && s.password === pass);
+
+if(!user){
+error.innerText="Invalid login details";
+return;
+}
+
+localStorage.setItem("student", JSON.stringify(user));
+window.location.href = "student.html";
+}
+
+function toggle(){
+let regBtn = document.getElementById("registerBtn");
+let logBtn = document.getElementById("loginBtn");
+let title = document.getElementById("title");
+
+if(regBtn.style.display !== "none"){
+regBtn.style.display="none";
+logBtn.style.display="block";
+title.innerText="👨‍🎓 Student Login";
+}else{
+regBtn.style.display="block";
+logBtn.style.display="none";
+title.innerText="👨‍🎓 Student Register";
+}
+}
+</script>
+
+</body>
+</html>

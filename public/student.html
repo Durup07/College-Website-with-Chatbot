@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Dashboard</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+
+body{
+display:flex;
+background:#f4f6f9;
+min-height:100vh;
+}
+
+/* SIDEBAR */
+.sidebar{
+width:240px;
+background:linear-gradient(180deg,#36d1dc,#5b86e5);
+color:#fff;
+padding:20px;
+}
+
+.sidebar h2{margin-bottom:20px;}
+
+.sidebar ul{list-style:none;}
+
+.sidebar ul li{
+padding:12px;
+margin:10px 0;
+border-radius:10px;
+cursor:pointer;
+background:rgba(255,255,255,0.2);
+}
+
+.sidebar ul li:hover{
+background:#fff;
+color:#333;
+}
+
+/* MAIN */
+.main{
+flex:1;
+padding:20px;
+}
+
+.header{
+background:#fff;
+padding:15px;
+border-radius:10px;
+box-shadow:0 4px 10px rgba(0,0,0,0.1);
+display:flex;
+justify-content:space-between;
+}
+
+.section{
+display:none;
+margin-top:20px;
+background:#fff;
+padding:20px;
+border-radius:12px;
+box-shadow:0 4px 10px rgba(0,0,0,0.08);
+}
+
+.section.active{display:block;}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:10px;
+}
+
+th,td{
+padding:10px;
+border-bottom:1px solid #ddd;
+text-align:center;
+}
+
+button{
+padding:10px 15px;
+border:none;
+border-radius:8px;
+background:#5b86e5;
+color:#fff;
+cursor:pointer;
+}
+
+/* PRINT AREA */
+.print-area{
+display:none;
+padding:30px;
+}
+
+@media print{
+body *{visibility:hidden;}
+.print-area, .print-area *{visibility:visible;}
+.print-area{
+position:absolute;
+top:0;
+left:0;
+width:100%;
+}
+}
+</style>
+</head>
+
+<body>
+
+<script>
+let student = JSON.parse(localStorage.getItem("student"));
+if(!student){
+window.location.href="student-login.html";
+}
+</script>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+<h2>👨‍🎓 Student</h2>
+<ul>
+<li onclick="show('marks')">Marks</li>
+<li onclick="show('result')">Result</li>
+<li onclick="logout()">Logout</li>
+</ul>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<div class="header">
+<h2>Welcome, <span id="name"></span></h2>
+</div>
+
+<!-- MARKS -->
+<div id="marks" class="section active">
+<h3>📊 Marks</h3>
+
+<table id="marksTable">
+<tr>
+<th>Subject</th>
+<th>Marks</th>
+</tr>
+</table>
+
+</div>
+
+<!-- RESULT -->
+<div id="result" class="section">
+<h3>🎯 Result</h3>
+
+<p>Total: <span id="total"></span></p>
+<p>Percentage: <span id="percent"></span>%</p>
+<p>Result: <span id="final"></span></p>
+
+<br>
+<button onclick="downloadResult()">⬇ Download Result</button>
+
+</div>
+
+</div>
+
+<!-- PRINT RESULT -->
+<div class="print-area" id="printArea">
+
+<h1 style="text-align:center;">ABC College</h1>
+<h3 style="text-align:center;">Student Marksheet</h3>
+
+<p>Name: <span id="pname"></span></p>
+
+<table border="1" width="100%" style="margin-top:10px;border-collapse:collapse;">
+<tr>
+<th>Subject</th>
+<th>Marks</th>
+</tr>
+<tbody id="printTable"></tbody>
+</table>
+
+<p>Total: <span id="ptotal"></span></p>
+<p>Percentage: <span id="ppercent"></span>%</p>
+<p>Result: <span id="pfinal"></span></p>
+
+<div style="margin-top:40px;display:flex;justify-content:space-between;">
+<p>Teacher Sign</p>
+<p>Principal Sign</p>
+</div>
+
+</div>
+
+<script>
+
+// NAME
+document.getElementById("name").innerText = student.name;
+
+// NAVIGATION
+function show(id){
+document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+}
+
+// LOGOUT
+function logout(){
+localStorage.removeItem("student");
+window.location.href="student-login.html";
+}
+
+// LOAD DATA
+let subjects = JSON.parse(localStorage.getItem("subjects") || "[]");
+let allMarks = JSON.parse(localStorage.getItem("marks") || "{}");
+
+let myMarks = allMarks[student.email];
+
+let table = document.getElementById("marksTable");
+let printTable = document.getElementById("printTable");
+
+let total = 0;
+
+// DYNAMIC TABLE
+subjects.forEach(sub=>{
+let mark = myMarks ? myMarks[sub] || 0 : 0;
+
+let row = document.createElement("tr");
+row.innerHTML = `<td>${sub}</td><td>${mark}</td>`;
+table.appendChild(row);
+
+// print table
+let prow = document.createElement("tr");
+prow.innerHTML = `<td>${sub}</td><td>${mark}</td>`;
+printTable.appendChild(prow);
+
+total += parseInt(mark);
+});
+
+let percent = subjects.length ? total / subjects.length : 0;
+
+let resultText = percent >= 40 ? "Pass" : "Fail";
+
+// SHOW RESULT
+document.getElementById("total").innerText = total;
+document.getElementById("percent").innerText = percent.toFixed(2);
+document.getElementById("final").innerText = resultText;
+
+// DOWNLOAD
+function downloadResult(){
+
+document.getElementById("pname").innerText = student.name;
+document.getElementById("ptotal").innerText = total;
+document.getElementById("ppercent").innerText = percent.toFixed(2);
+document.getElementById("pfinal").innerText = resultText;
+
+window.print();
+}
+
+</script>
+
+</body>
+</html>

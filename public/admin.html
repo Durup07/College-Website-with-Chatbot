@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin Notice Panel</title>
+</head>
+
+<body>
+
+<h2>Update Notice Board</h2>
+
+<textarea id="notice" placeholder="Write new notice"></textarea>
+
+<button onclick="addNotice()">Add Notice</button>
+
+<ul id="notice-list"></ul>
+
+<script>
+
+function addNotice(){
+
+let notice = document.getElementById("notice").value;
+
+let li = document.createElement("li");
+
+li.innerText = notice;
+
+document.getElementById("notice-list").appendChild(li);
+
+}
+
+</script>
+
+</body>
+</html>
