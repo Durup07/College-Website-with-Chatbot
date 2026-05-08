@@ -108,12 +108,6 @@ width:100%;
 </head>
 
 <body>
-
-<script>
-let student = JSON.parse(localStorage.getItem("student"));
-if(!student){
-window.location.href="student-login.html";
-}
 </script>
 
 <!-- SIDEBAR -->
@@ -130,7 +124,22 @@ window.location.href="student-login.html";
 <div class="main">
 
 <div class="header">
+
+<div style="display:flex;align-items:center;gap:15px;">
+
+<img id="studentImage"
+style="
+width:60px;
+height:60px;
+border-radius:50%;
+object-fit:cover;
+border:3px solid #5b86e5;
+">
+
 <h2>Welcome, <span id="name"></span></h2>
+
+</div>
+
 </div>
 
 <!-- MARKS -->
@@ -192,7 +201,8 @@ window.location.href="student-login.html";
 
 // NAME
 document.getElementById("name").innerText = student.name;
-
+document.getElementById("studentImage").src =
+student.image || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
 // NAVIGATION
 function show(id){
 document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
@@ -251,7 +261,9 @@ document.getElementById("pfinal").innerText = resultText;
 
 window.print();
 }
-
+socket.on("refreshStudentData", ()=>{
+loadSubjects(); // auto refresh
+});
 </script>
 
 </body>

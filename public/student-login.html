@@ -3,15 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Student Register & Login</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<title>Student Auth</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
 <style>
 *{
 margin:0;
 padding:0;
 box-sizing:border-box;
-font-family:'Poppins',sans-serif;
+font-family:Poppins;
 }
+
 body{
 height:100vh;
 display:flex;
@@ -19,18 +22,26 @@ justify-content:center;
 align-items:center;
 background:linear-gradient(135deg,#36d1dc,#5b86e5);
 }
-.container{
+
+.box{
 background:#fff;
 padding:25px;
+width:360px;
 border-radius:15px;
-width:380px;
 box-shadow:0 10px 25px rgba(0,0,0,0.2);
+animation:fade 0.4s ease;
 }
+
+@keyframes fade{
+from{opacity:0; transform:translateY(20px);}
+to{opacity:1; transform:translateY(0);}
+}
+
 h2{
 text-align:center;
 margin-bottom:15px;
-color:#333;
 }
+
 input{
 width:100%;
 padding:12px;
@@ -39,135 +50,223 @@ border:1px solid #ddd;
 border-radius:10px;
 outline:none;
 }
+
 button{
 width:100%;
 padding:12px;
-margin-top:10px;
 border:none;
 border-radius:10px;
-cursor:pointer;
 color:#fff;
-font-size:15px;
+cursor:pointer;
+font-weight:600;
+margin-top:8px;
 }
-.register-btn{background:#28a745;}
-.login-btn{background:#4e54c8;}
-button:hover{opacity:0.9;}
-.error{
-color:red;
+
+#registerBtn{background:#28a745;}
+#loginBtn{background:#4e54c8; display:none;}
+
+.toggle{
 text-align:center;
 margin-top:10px;
+cursor:pointer;
+color:#4e54c8;
+font-size:14px;
 }
-.success{
-color:green;
+
+.preview{
 text-align:center;
-margin-top:10px;
+margin-bottom:10px;
 }
-.switch{
+
+.preview img{
+width:70px;
+height:70px;
+border-radius:50%;
+object-fit:cover;
+border:3px solid #4e54c8;
+}
+
+.msg{
 text-align:center;
 margin-top:10px;
 font-size:14px;
-cursor:pointer;
-color:#4e54c8;
 }
+
+.error{color:red;}
+.success{color:green;}
 </style>
 </head>
+
 <body>
 
-<div class="container">
+<div class="box">
 
-<h2 id="title">👨‍🎓 Student Register</h2>
+<h2 id="title">Student Register</h2>
 
-<input type="text" id="name" placeholder="Enter Name">
-<input type="text" id="email" placeholder="Enter Email">
-<input type="password" id="password" placeholder="Enter Password">
-
-<button class="register-btn" onclick="register()" id="registerBtn">Register</button>
-<button class="login-btn" onclick="login()" id="loginBtn" style="display:none;">Login</button>
-
-<div class="switch" onclick="toggle()">
-Already have account? Login here
+<div class="preview">
+<img id="imgPrev"
+src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
 </div>
 
-<div class="error" id="error"></div>
-<div class="success" id="success"></div>
+<input type="text" id="name" placeholder="Full Name">
+<input type="text" id="email" placeholder="Email">
+<input type="password" id="password" placeholder="Password">
+<input type="file" id="image" accept="image/*">
+
+<button id="registerBtn" onclick="register()">Register</button>
+<button id="loginBtn" onclick="login()">Login</button>
+
+<div class="toggle" onclick="toggle()">
+Switch to Login / Register
+</div>
+
+<div class="msg error" id="error"></div>
+<div class="msg success" id="success"></div>
 
 </div>
 
 <script>
-function getStudents(){
-return JSON.parse(localStorage.getItem("students") || "[]");
-}
 
-function saveStudents(data){
-localStorage.setItem("students", JSON.stringify(data));
-}
+const API = "http://localhost:3000";
 
-function register(){
+/* IMAGE PREVIEW */
+document.getElementById("image").addEventListener("change", function () {
+let file = this.files[0];
+if (file) {
+let reader = new FileReader();
+reader.onload = e => {
+document.getElementById("imgPrev").src = e.target.result;
+};
+reader.readAsDataURL(file);
+}
+});
+
+/* REGISTER */
+async function register(){
+
 let name = document.getElementById("name").value;
 let email = document.getElementById("email").value;
-let pass = document.getElementById("password").value;
+let password = document.getElementById("password").value;
+let file = document.getElementById("image").files[0];
+
 let error = document.getElementById("error");
 let success = document.getElementById("success");
 
-error.innerText="";
-success.innerText="";
+error.innerText = "";
+success.innerText = "";
 
-if(!name || !email || !pass){
-error.innerText="All fields are required";
+if(!name || !email || !password){
+error.innerText = "All fields required";
 return;
 }
 
-let students = getStudents();
-
-let exists = students.find(s => s.email === email);
-if(exists){
-error.innerText="Email already registered";
-return;
+let image = "";
+if(file){
+image = await toBase64(file);
 }
 
-students.push({name,email,password:pass});
-saveStudents(students);
+try {
 
-success.innerText="Registration successful! Now login";
+let res = await fetch(API + "/student/register", {
+method: "POST",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify({
+name,
+email,
+password,
+image
+})
+});
+
+let data = await res.json();
+
+if(data.success){
+success.innerText = "Registered Successfully ✅ Now Login";
+} else {
+error.innerText = data.message || "Registration Failed";
 }
 
-function login(){
+} catch(err){
+error.innerText = "Server Not Running";
+}
+
+}
+
+/* LOGIN (ONLY EMAIL + PASSWORD) */
+async function login(){
+
 let email = document.getElementById("email").value;
-let pass = document.getElementById("password").value;
-let error = document.getElementById("error");
-let success = document.getElementById("success");
+let password = document.getElementById("password").value;
 
-error.innerText="";
-success.innerText="";
-
-let students = getStudents();
-
-let user = students.find(s => s.email === email && s.password === pass);
-
-if(!user){
-error.innerText="Invalid login details";
+if(!email || !password){
+alert("Email & Password required");
 return;
 }
 
-localStorage.setItem("student", JSON.stringify(user));
+try {
+
+let res = await fetch(API + "/student/login", {
+method: "POST",
+headers: { "Content-Type":"application/json" },
+body: JSON.stringify({email,password})
+});
+
+let data = await res.json();
+
+if(data.success){
+localStorage.setItem("student", JSON.stringify(data.user));
 window.location.href = "student.html";
+} else {
+alert("Invalid Login");
 }
 
+} catch(err){
+alert("Server Error");
+}
+
+}
+
+/* TOGGLE */
 function toggle(){
-let regBtn = document.getElementById("registerBtn");
-let logBtn = document.getElementById("loginBtn");
+
+let reg = document.getElementById("registerBtn");
+let log = document.getElementById("loginBtn");
 let title = document.getElementById("title");
 
-if(regBtn.style.display !== "none"){
-regBtn.style.display="none";
-logBtn.style.display="block";
-title.innerText="👨‍🎓 Student Login";
-}else{
-regBtn.style.display="block";
-logBtn.style.display="none";
-title.innerText="👨‍🎓 Student Register";
+let name = document.getElementById("name");
+let image = document.getElementById("image");
+
+if(reg.style.display !== "none"){
+
+// LOGIN MODE
+reg.style.display = "none";
+log.style.display = "block";
+name.style.display = "none";
+image.style.display = "none";
+title.innerText = "Student Login";
+
+} else {
+
+// REGISTER MODE
+reg.style.display = "block";
+log.style.display = "none";
+name.style.display = "block";
+image.style.display = "block";
+title.innerText = "Student Register";
 }
+
 }
+
+/* BASE64 */
+function toBase64(file){
+return new Promise((resolve,reject)=>{
+let reader = new FileReader();
+reader.readAsDataURL(file);
+reader.onload = ()=>resolve(reader.result);
+reader.onerror = err=>reject(err);
+});
+}
+
 </script>
 
 </body>

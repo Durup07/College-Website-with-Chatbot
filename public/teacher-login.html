@@ -3,109 +3,472 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Teacher Login</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<title>Animated Teacher Login</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
+
 *{
 margin:0;
 padding:0;
 box-sizing:border-box;
 font-family:'Poppins',sans-serif;
 }
+
 body{
 height:100vh;
 display:flex;
 justify-content:center;
 align-items:center;
 background:linear-gradient(135deg,#4e54c8,#8f94fb);
+overflow:hidden;
+position:relative;
 }
+
+/* FLOATING CIRCLES */
+
+.circle{
+position:absolute;
+border-radius:50%;
+background:rgba(255,255,255,0.1);
+animation:float 8s infinite ease-in-out;
+}
+
+.circle:nth-child(1){
+width:250px;
+height:250px;
+top:-80px;
+left:-80px;
+}
+
+.circle:nth-child(2){
+width:180px;
+height:180px;
+bottom:-60px;
+right:-60px;
+animation-delay:2s;
+}
+
+.circle:nth-child(3){
+width:120px;
+height:120px;
+bottom:120px;
+left:100px;
+animation-delay:4s;
+}
+
+@keyframes float{
+
+0%,100%{
+transform:translateY(0px);
+}
+
+50%{
+transform:translateY(25px);
+}
+
+}
+
+/* LOGIN CARD */
+
 .container{
-background:#fff;
-padding:30px;
-border-radius:15px;
-width:350px;
-box-shadow:0 10px 25px rgba(0,0,0,0.2);
+position:relative;
+z-index:10;
+width:370px;
+padding:35px;
+border-radius:25px;
+background:rgba(255,255,255,0.15);
+backdrop-filter:blur(12px);
+box-shadow:0 15px 35px rgba(0,0,0,0.2);
+animation:slideUp 1s ease;
+overflow:hidden;
 }
+
+@keyframes slideUp{
+
+from{
+opacity:0;
+transform:translateY(50px);
+}
+
+to{
+opacity:1;
+transform:translateY(0);
+}
+
+}
+
+/* GLOW EFFECT */
+
+.container::before{
+content:'';
+position:absolute;
+top:-50%;
+left:-50%;
+width:200%;
+height:200%;
+background:linear-gradient(
+45deg,
+transparent,
+rgba(255,255,255,0.2),
+transparent
+);
+transform:rotate(25deg);
+animation:shine 6s linear infinite;
+}
+
+@keyframes shine{
+
+0%{
+left:-150%;
+}
+
+100%{
+left:150%;
+}
+
+}
+
+/* TITLE */
+
+.logo{
+font-size:70px;
+text-align:center;
+margin-bottom:10px;
+animation:bounce 2s infinite;
+}
+
+@keyframes bounce{
+
+0%,100%{
+transform:translateY(0);
+}
+
+50%{
+transform:translateY(-10px);
+}
+
+}
+
 h2{
 text-align:center;
+margin-bottom:25px;
+color:white;
+font-size:30px;
+font-weight:700;
+}
+
+/* PROFILE IMAGE */
+
+.profile{
+display:flex;
+justify-content:center;
 margin-bottom:20px;
-color:#4e54c8;
 }
-input,select{
+
+.profile img{
+width:110px;
+height:110px;
+border-radius:50%;
+border:5px solid white;
+object-fit:cover;
+transition:0.5s;
+animation:rotateImage 8s linear infinite;
+box-shadow:0 8px 20px rgba(0,0,0,0.2);
+}
+
+@keyframes rotateImage{
+
+0%{
+transform:rotate(0deg);
+}
+
+100%{
+transform:rotate(360deg);
+}
+
+}
+
+/* INPUT BOX */
+
+.input-box{
+position:relative;
+margin-bottom:18px;
+}
+
+select,
+input{
 width:100%;
-padding:12px;
-margin:10px 0;
-border:1px solid #ddd;
-border-radius:10px;
+padding:14px;
+border:none;
 outline:none;
+border-radius:15px;
+background:rgba(255,255,255,0.92);
+font-size:15px;
+transition:0.3s;
 }
+
+select:focus,
+input:focus{
+transform:scale(1.02);
+box-shadow:0 0 15px rgba(255,255,255,0.5);
+}
+
+/* PASSWORD EYE */
+
+.eye{
+position:absolute;
+right:15px;
+top:50%;
+transform:translateY(-50%);
+cursor:pointer;
+font-size:18px;
+}
+
+/* BUTTON */
+
 button{
 width:100%;
-padding:12px;
-background:#4e54c8;
-color:#fff;
+padding:14px;
 border:none;
-border-radius:10px;
+border-radius:15px;
+background:linear-gradient(135deg,#00c6ff,#0072ff);
+color:white;
+font-size:17px;
+font-weight:600;
 cursor:pointer;
-font-size:16px;
-margin-top:10px;
+transition:0.4s;
 }
+
 button:hover{
-background:#3b40a4;
+transform:translateY(-3px) scale(1.02);
+box-shadow:0 10px 20px rgba(0,114,255,0.4);
 }
+
+/* ERROR */
+
 .error{
-color:red;
+color:#ffe3e3;
 text-align:center;
-margin-top:10px;
+margin-top:15px;
+font-weight:500;
+animation:shake 0.3s;
 }
+
+@keyframes shake{
+
+0%{transform:translateX(0);}
+25%{transform:translateX(-5px);}
+50%{transform:translateX(5px);}
+75%{transform:translateX(-5px);}
+100%{transform:translateX(0);}
+
+}
+
+/* FOOTER */
+
+.footer{
+text-align:center;
+margin-top:20px;
+font-size:13px;
+color:white;
+opacity:0.8;
+}
+
+/* MOBILE */
+
+@media(max-width:450px){
+
+.container{
+width:92%;
+padding:25px;
+}
+
+}
+
 </style>
 </head>
+
 <body>
 
-<div class="container">
-<h2>👨‍🏫 Teacher Login</h2>
+<div class="circle"></div>
+<div class="circle"></div>
+<div class="circle"></div>
 
-<select id="teacher">
+<div class="container">
+
+<div class="logo">👨‍🏫</div>
+
+<h2>Teacher Login</h2>
+
+<div class="profile">
+
+<img
+id="teacherImage"
+src="https://i.pravatar.cc/150?img=12">
+
+</div>
+
+<div class="input-box">
+
+<select id="teacher" onchange="changeTeacher()">
+
 <option value="">Select Teacher</option>
+
 <option value="Rahul">Rahul</option>
 <option value="Ajit">Ajit</option>
 <option value="Vivek">Vivek</option>
 <option value="Sumit">Sumit</option>
+
 </select>
 
-<input type="password" id="password" placeholder="Enter Password">
+</div>
 
-<button onclick="login()">Login</button>
+<div class="input-box">
+
+<input
+type="password"
+id="password"
+placeholder="Enter Password">
+
+<span class="eye"
+onclick="togglePassword()">
+👁️
+</span>
+
+</div>
+
+<button onclick="login()">
+Login
+</button>
 
 <div class="error" id="error"></div>
+
+<div class="footer">
+Advanced ERP Teacher Portal
+</div>
+
 </div>
 
 <script>
-// FIXED TEACHERS DATA
+
+// TEACHER DATA
+
 const teachers = {
-"Rahul": "rahul123",
-"Ajit": "ajit123",
-"Vivek": "vivek123",
-"Sumit": "sumit123"
+
+Rahul:{
+password:"rahul123",
+image:"https://i.pravatar.cc/150?img=11"
+},
+
+Ajit:{
+password:"ajit123",
+image:"https://i.pravatar.cc/150?img=12"
+},
+
+Vivek:{
+password:"vivek123",
+image:"https://i.pravatar.cc/150?img=13"
+},
+
+Sumit:{
+password:"sumit123",
+image:"images/sumit.jpeg"
+}
+
 };
 
+// CHANGE IMAGE
+
+function changeTeacher(){
+
+const teacher =
+document.getElementById("teacher").value;
+
+const img =
+document.getElementById("teacherImage");
+
+if(teachers[teacher]){
+
+img.style.transform =
+"scale(0) rotate(360deg)";
+
+setTimeout(()=>{
+
+img.src =
+teachers[teacher].image;
+
+img.style.transform =
+"scale(1) rotate(0deg)";
+
+},300);
+
+}
+
+}
+
+// PASSWORD TOGGLE
+
+function togglePassword(){
+
+const pass =
+document.getElementById("password");
+
+pass.type =
+pass.type === "password"
+? "text"
+: "password";
+
+}
+
+// LOGIN
+
 function login(){
-const name = document.getElementById("teacher").value;
-const pass = document.getElementById("password").value;
-const error = document.getElementById("error");
+
+const name =
+document.getElementById("teacher").value;
+
+const pass =
+document.getElementById("password").value;
+
+const error =
+document.getElementById("error");
+
+error.innerText = "";
 
 if(!name || !pass){
-error.innerText = "Please select teacher and enter password";
+
+error.innerText =
+"Please fill all fields";
+
 return;
+
 }
 
-if(teachers[name] === pass){
-localStorage.setItem("teacher", name);
-window.location.href = "teacher.html"; 
+if(teachers[name].password === pass){
+
+localStorage.setItem(
+"teacher",
+JSON.stringify({
+name:name,
+image:teachers[name].image
+})
+);
+
+window.location.href =
+"teacher.html";
+
 }else{
-error.innerText = "Invalid username or password";
+
+error.innerText =
+"Invalid username or password";
+
 }
+
 }
+
 </script>
 
 </body>
